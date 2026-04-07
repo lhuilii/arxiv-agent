@@ -3,12 +3,12 @@ import logging
 import os
 from typing import AsyncIterator, Optional
 
-from langchain.agents import AgentExecutor, create_tool_calling_agent
-from langchain.memory import ConversationBufferWindowMemory
-from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_classic.agents import AgentExecutor, create_tool_calling_agent
+from langchain_classic.memory import ConversationBufferWindowMemory
+from langchain_classic.callbacks import AsyncIteratorCallbackHandler
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_community.chat_models.tongyi import ChatTongyi
 from langchain_core.messages import AIMessage, HumanMessage
-from langchain_core.callbacks import AsyncIteratorCallbackHandler
 
 from src.agent.tools import AGENT_TOOLS
 from src.cache.redis_manager import get_redis_manager
