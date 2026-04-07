@@ -47,9 +47,9 @@ class ArxivFetcher:
     def __init__(self, max_results_per_query: int = 20):
         self.max_results_per_query = max_results_per_query
         self._client = arxiv.Client(
-            page_size=100,
-            delay_seconds=3.0,
-            num_retries=3,
+            page_size=10,       # 只拿需要的数量，不要一次拉 100 条
+            delay_seconds=1.0,  # 减少强制等待时间
+            num_retries=1,      # 减少重试次数，快速失败
         )
 
     @retry(
@@ -97,9 +97,16 @@ class ArxivFetcher:
         )
 
         papers: list[ArxivPaper] = []
-        # Run synchronous client in thread pool to avoid blocking
+        # Run synchronous client in thread pool with a hard timeout
         loop = asyncio.get_event_loop()
-        results = await loop.run_in_executor(None, lambda: list(self._client.results(search)))
+        try:
+            results = await asyncio.wait_for(
+                loop.run_in_executor(None, lambda: list(self._client.results(search))),
+                timeout=30.0,
+            )
+        except asyncio.TimeoutError:
+            logger.warning(f"ArXiv search timed out for query: {full_query!r}")
+            return []
 
         for result in results:
             paper_id = result.entry_id.split("/")[-1]  # e.g. "2401.12345v1"
@@ -126,7 +133,14 @@ class ArxivFetcher:
         """Fetch a single paper by ArXiv ID."""
         search = arxiv.Search(id_list=[paper_id])
         loop = asyncio.get_event_loop()
-        results = await loop.run_in_executor(None, lambda: list(self._client.results(search)))
+        try:
+            results = await asyncio.wait_for(
+                loop.run_in_executor(None, lambda: list(self._client.results(search))),
+                timeout=20.0,
+            )
+        except asyncio.TimeoutError:
+            logger.warning(f"ArXiv fetch_by_id timed out for {paper_id}")
+            return None
         if not results:
             return None
         result = results[0]
