@@ -54,7 +54,7 @@ class ArxivFetcher:
 
     @retry(
         stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=1, min=2, max=10),
+        wait=wait_exponential(multiplier=2, min=10, max=60),  # 429时等10-60秒再重试
         reraise=True,
     )
     async def search(
