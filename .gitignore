@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+dist/
+.mypy_cache/
+.ruff_cache/
+
+# Environment
+.env
+*.local
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Docker
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# SSL certs
+nginx/ssl/
+
+# Test artifacts
+.pytest_cache/
+htmlcov/
+.coverage

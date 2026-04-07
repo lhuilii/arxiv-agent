@@ -1,0 +1,124 @@
+[
+  {
+    "id": "eval_001",
+    "query": "What are the main contributions of RAG (Retrieval-Augmented Generation)?",
+    "expected_topics": ["retrieval", "generation", "knowledge base", "hallucination reduction"],
+    "expected_tools": ["search_papers"]
+  },
+  {
+    "id": "eval_002",
+    "query": "Find papers about attention mechanism in transformers",
+    "expected_topics": ["self-attention", "transformer", "BERT", "GPT"],
+    "expected_tools": ["search_papers"]
+  },
+  {
+    "id": "eval_003",
+    "query": "Analyze the paper 2005.11401",
+    "expected_topics": ["RAG", "knowledge-intensive NLP", "retrieval"],
+    "expected_tools": ["get_paper_detail", "analyze_paper"]
+  },
+  {
+    "id": "eval_004",
+    "query": "Compare vector databases: what papers discuss Milvus vs Faiss?",
+    "expected_topics": ["vector search", "ANN", "index", "similarity search"],
+    "expected_tools": ["search_papers", "compare_papers"]
+  },
+  {
+    "id": "eval_005",
+    "query": "Generate a report on large language model fine-tuning techniques",
+    "expected_topics": ["LoRA", "PEFT", "instruction tuning", "RLHF"],
+    "expected_tools": ["search_papers", "generate_report"]
+  },
+  {
+    "id": "eval_006",
+    "query": "What are the latest advances in multi-modal AI in 2024?",
+    "expected_topics": ["vision-language", "CLIP", "image captioning", "multi-modal"],
+    "expected_tools": ["search_papers"]
+  },
+  {
+    "id": "eval_007",
+    "query": "Explain the chain-of-thought prompting technique",
+    "expected_topics": ["reasoning", "few-shot", "CoT", "step-by-step"],
+    "expected_tools": ["search_papers", "analyze_paper"]
+  },
+  {
+    "id": "eval_008",
+    "query": "What methods exist for reducing LLM hallucinations?",
+    "expected_topics": ["factuality", "grounding", "retrieval", "calibration"],
+    "expected_tools": ["search_papers", "generate_report"]
+  },
+  {
+    "id": "eval_009",
+    "query": "分析2024年RAG领域的最新进展",
+    "expected_topics": ["RAG", "检索增强", "向量数据库", "知识库"],
+    "expected_tools": ["search_papers", "generate_report"],
+    "language": "zh"
+  },
+  {
+    "id": "eval_010",
+    "query": "Find papers on reinforcement learning from human feedback",
+    "expected_topics": ["RLHF", "reward model", "PPO", "alignment"],
+    "expected_tools": ["search_papers"]
+  },
+  {
+    "id": "eval_011",
+    "query": "What is the difference between BM25 and dense retrieval?",
+    "expected_topics": ["sparse retrieval", "dense retrieval", "BM25", "DPR"],
+    "expected_tools": ["search_papers", "compare_papers"]
+  },
+  {
+    "id": "eval_012",
+    "query": "Papers on knowledge graph embeddings",
+    "expected_topics": ["TransE", "knowledge graph", "entity embedding", "link prediction"],
+    "expected_tools": ["search_papers"]
+  },
+  {
+    "id": "eval_013",
+    "query": "Summarize recent work on efficient transformer architectures",
+    "expected_topics": ["linear attention", "sparse attention", "Longformer", "efficiency"],
+    "expected_tools": ["search_papers", "generate_report"]
+  },
+  {
+    "id": "eval_014",
+    "query": "Compare GPT-4 and Claude approaches based on published papers",
+    "expected_topics": ["RLHF", "Constitutional AI", "scaling", "safety"],
+    "expected_tools": ["search_papers", "compare_papers"]
+  },
+  {
+    "id": "eval_015",
+    "query": "What are the key papers on neural code generation?",
+    "expected_topics": ["code completion", "Codex", "code LLM", "programming"],
+    "expected_tools": ["search_papers"]
+  },
+  {
+    "id": "eval_016",
+    "query": "Analyze trends in NLP benchmarks over the last 3 years",
+    "expected_topics": ["GLUE", "SuperGLUE", "MMLU", "benchmark"],
+    "expected_tools": ["search_papers", "generate_report"]
+  },
+  {
+    "id": "eval_017",
+    "query": "Papers about continual learning and catastrophic forgetting",
+    "expected_topics": ["catastrophic forgetting", "EWC", "replay", "continual learning"],
+    "expected_tools": ["search_papers"]
+  },
+  {
+    "id": "eval_018",
+    "query": "What is the FlashAttention paper about?",
+    "expected_topics": ["IO-aware", "memory efficient", "attention", "GPU"],
+    "expected_tools": ["search_papers", "get_paper_detail", "analyze_paper"]
+  },
+  {
+    "id": "eval_019",
+    "query": "给我分析一下大模型量化技术的现状",
+    "expected_topics": ["量化", "GPTQ", "AWQ", "int8", "int4"],
+    "expected_tools": ["search_papers", "generate_report"],
+    "language": "zh"
+  },
+  {
+    "id": "eval_020",
+    "query": "Find and compare papers on speculative decoding for LLM inference",
+    "expected_topics": ["speculative decoding", "draft model", "inference speed", "latency"],
+    "expected_tools": ["search_papers", "compare_papers"]
+  }
+]

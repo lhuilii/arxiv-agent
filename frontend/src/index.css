@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #1e1e2e; }
+::-webkit-scrollbar-thumb { background: #4a4a6a; border-radius: 3px; }
+
+/* SSE token stream animation */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.cursor-blink::after {
+  content: '▋';
+  animation: blink 1s step-end infinite;
+  color: #7c3aed;
+}
+
+/* Markdown prose overrides inside chat */
+.prose pre {
+  @apply bg-gray-900 rounded-lg text-sm overflow-x-auto;
+}
+.prose code {
+  @apply bg-gray-800 rounded px-1 text-purple-300;
+}
+.prose table {
+  @apply text-sm;
+}
