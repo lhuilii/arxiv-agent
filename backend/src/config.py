@@ -1,11 +1,15 @@
 """Application configuration via pydantic-settings."""
 from functools import lru_cache
+from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# backend/src/config.py → src → backend → project root
+_ROOT_ENV = Path(__file__).parent.parent.parent / ".env"
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=str(_ROOT_ENV),
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
