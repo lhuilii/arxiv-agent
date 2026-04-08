@@ -183,6 +183,18 @@ class MilvusClient:
         )
         return sorted(results, key=lambda x: x.get("chunk_index", 0))
 
+    async def delete_paper(self, paper_id: str) -> int:
+        """Delete all chunks for a paper from Milvus.
+
+        Returns:
+            Number of chunks deleted.
+        """
+        expr = f'paper_id == "{paper_id}"'
+        result = self.collection.delete(expr)
+        self.collection.flush()
+        logger.info(f"Deleted chunks for paper {paper_id} (count={result.delete_count})")
+        return result.delete_count
+
     def get_collection_stats(self) -> dict:
         """Return collection statistics."""
         stats = utility.get_query_segment_info(COLLECTION_NAME)

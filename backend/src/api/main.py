@@ -232,6 +232,15 @@ async def ingest_papers(request: IngestRequest):
     )
 
 
+@app.delete("/api/papers/{paper_id}")
+async def delete_paper(paper_id: str):
+    """Delete a paper and all its chunks from the vector store."""
+    if _milvus is None:
+        raise HTTPException(status_code=503, detail="Milvus not connected")
+    count = await _milvus.delete_paper(paper_id)
+    return {"paper_id": paper_id, "deleted_chunks": count}
+
+
 @app.get("/api/papers/search")
 async def search_papers_endpoint(
     q: str = Query(..., min_length=1),

@@ -4,7 +4,7 @@ import SearchBar from './components/SearchBar'
 import PaperList from './components/PaperList'
 import ChatPanel from './components/ChatPanel'
 import { Paper } from './types'
-import { searchPapers, healthCheck } from './api'
+import { searchPapers, healthCheck, deletePaper } from './api'
 
 const SESSION_ID = crypto.randomUUID()
 
@@ -12,6 +12,14 @@ export default function App() {
   const [papers, setPapers] = useState<Paper[]>([])
   const [loadingPapers, setLoadingPapers] = useState(false)
   const [health, setHealth] = useState<{ status: string; services?: Record<string, string> } | null>(null)
+  const [favorites, setFavorites] = useState<Paper[]>(() => {
+    try {
+      const stored = localStorage.getItem('arxiv-favorites')
+      return stored ? JSON.parse(stored) : []
+    } catch {
+      return []
+    }
+  })
 
   useEffect(() => {
     healthCheck().then(setHealth).catch(() => setHealth({ status: 'unreachable' }))
@@ -31,9 +39,38 @@ export default function App() {
   }
 
   const handleIngestDone = (_count: number, query: string) => {
-    // Auto-search with the same query so the newly indexed papers appear in the list
-    if (query) {
-      handleSearch(query)
+    if (query) handleSearch(query)
+  }
+
+  const handleToggleFavorite = (paperId: string) => {
+    setFavorites((prev) => {
+      const exists = prev.some((p) => p.paper_id === paperId)
+      const next = exists
+        ? prev.filter((p) => p.paper_id !== paperId)
+        : (() => {
+            const paper = papers.find((p) => p.paper_id === paperId)
+            return paper ? [...prev, paper] : prev
+          })()
+      localStorage.setItem('arxiv-favorites', JSON.stringify(next))
+      return next
+    })
+  }
+
+  const handleDeletePaper = async (paperId: string) => {
+    // Optimistic update: remove from UI immediately
+    setPapers((prev) => prev.filter((p) => p.paper_id !== paperId))
+    setFavorites((prev) => {
+      const next = prev.filter((p) => p.paper_id !== paperId)
+      if (next.length !== prev.length) {
+        localStorage.setItem('arxiv-favorites', JSON.stringify(next))
+      }
+      return next
+    })
+    // Delete from Milvus in background
+    try {
+      await deletePaper(paperId)
+    } catch (err) {
+      console.error('Delete from Milvus failed:', err)
     }
   }
 
@@ -73,19 +110,14 @@ export default function App() {
       <div className="flex-1 flex overflow-hidden">
         {/* Left panel: Paper list */}
         <aside className="w-80 flex-shrink-0 border-r border-gray-800 flex flex-col">
-          <div className="px-4 py-2.5 border-b border-gray-800">
-            <h2 className="text-sm font-medium text-gray-300">
-              Papers
-              {papers.length > 0 && (
-                <span className="ml-2 text-xs text-gray-500">({papers.length})</span>
-              )}
-            </h2>
-          </div>
           <div className="flex-1 overflow-y-auto p-3">
             <PaperList
               papers={papers}
+              favorites={favorites}
               loading={loadingPapers}
               onSelect={(p) => window.open(p.arxiv_url, '_blank')}
+              onDelete={handleDeletePaper}
+              onToggleFavorite={handleToggleFavorite}
             />
           </div>
         </aside>

@@ -22,6 +22,12 @@ export async function getSessionHistory(sessionId: string) {
   return res.json()
 }
 
+export async function deletePaper(paperId: string) {
+  const res = await fetch(`${BASE}/papers/${encodeURIComponent(paperId)}`, { method: 'DELETE' })
+  if (!res.ok) throw new Error(await res.text())
+  return res.json()
+}
+
 export async function clearCache() {
   const res = await fetch(`${BASE}/cache`, { method: 'DELETE' })
   if (!res.ok) throw new Error(await res.text())
