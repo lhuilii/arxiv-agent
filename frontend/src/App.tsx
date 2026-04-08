@@ -92,7 +92,7 @@ export default function App() {
 
         {/* Right panel: Chat */}
         <main className="flex-1 flex flex-col min-w-0">
-          <ChatPanel sessionId={SESSION_ID} />
+          <ChatPanel sessionId={SESSION_ID} onQuerySearch={handleSearch} />
         </main>
       </div>
     </div>

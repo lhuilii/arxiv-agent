@@ -8,10 +8,10 @@ import { streamChat } from '../api'
 
 interface Props {
   sessionId: string
-  onPapersFound?: (paperIds: string[]) => void
+  onQuerySearch?: (query: string) => void
 }
 
-export default function ChatPanel({ sessionId, onPapersFound }: Props) {
+export default function ChatPanel({ sessionId, onQuerySearch }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const [streaming, setStreaming] = useState(false)
@@ -46,6 +46,7 @@ export default function ChatPanel({ sessionId, onPapersFound }: Props) {
 
     setMessages((prev) => [...prev, userMsg, assistantMsg])
     setStreaming(true)
+    onQuerySearch?.(text)
 
     const steps: ToolStep[] = []
 
