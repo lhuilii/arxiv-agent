@@ -9,7 +9,7 @@ from src.config import get_settings
 
 logger = logging.getLogger(__name__)
 
-EMBEDDING_DIM = 1536  # text-embedding-v3 output dimension
+EMBEDDING_DIM = 1024  # text-embedding-v3 default output dimension
 
 
 class DashScopeEmbeddings:
