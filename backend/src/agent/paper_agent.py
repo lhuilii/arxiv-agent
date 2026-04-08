@@ -4,8 +4,6 @@ import os
 from typing import AsyncIterator, Optional
 
 from langchain_classic.agents import AgentExecutor, create_tool_calling_agent
-from langchain_classic.memory import ConversationBufferWindowMemory
-from langchain_classic.callbacks import AsyncIteratorCallbackHandler
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_community.chat_models.tongyi import ChatTongyi
 from langchain_core.messages import AIMessage, HumanMessage
@@ -23,6 +21,13 @@ Your capabilities:
 - Retrieve and analyze full paper content
 - Compare multiple papers on methodology and contributions
 - Generate comprehensive research reports
+
+Tool selection strategy (follow this strictly):
+- For overview/survey questions ("最新进展", "survey", "what's new in X"): call `generate_report` FIRST — it already aggregates search and context in one call. Do NOT call search_papers separately before generate_report.
+- For a specific paper: call `get_paper_detail` or `analyze_paper` once, then answer directly.
+- For comparing papers: use `compare_papers` with a comma-separated list — do NOT call analyze_paper for each paper individually.
+- Limit `search_papers` to at most 1-2 calls per conversation turn. If the first search returns results, proceed with those.
+- After gathering context from tools, synthesize and answer immediately — do NOT call more tools than necessary.
 
 Guidelines:
 - Always cite specific paper IDs and titles when referencing papers
@@ -78,7 +83,7 @@ class PaperAgent:
             agent=agent,
             tools=AGENT_TOOLS,
             verbose=True,
-            max_iterations=8,
+            max_iterations=15,
             handle_parsing_errors=True,
             return_intermediate_steps=True,
         )
@@ -113,44 +118,54 @@ class PaperAgent:
             elif msg["role"] == "ai":
                 chat_history.append(AIMessage(content=msg["content"]))
 
-        callback = AsyncIteratorCallbackHandler()
-
         try:
-            import asyncio
-
-            task = asyncio.ensure_future(
-                self._executor.ainvoke(
-                    {
-                        "input": user_input,
-                        "chat_history": chat_history,
-                    },
-                    config={
-                        "callbacks": [callback],
-                        "run_name": f"paper_agent_{session_id[:8]}",
-                        "tags": ["arxiv-agent", f"session:{session_id[:8]}"],
-                        "metadata": {"session_id": session_id},
-                    },
-                )
-            )
-
-            # Stream tokens as they arrive
-            async for token in callback.aiter():
-                yield {"type": "token", "content": token}
-
-            result = await task
-            final_output = result.get("output", "")
-
-            # Extract intermediate steps for tool trace
             steps = []
-            for action, observation in result.get("intermediate_steps", []):
-                steps.append(
-                    {
-                        "tool": action.tool,
-                        "input": str(action.tool_input),
-                        "output": str(observation)[:500],
-                    }
-                )
-                yield {"type": "tool_end", "tool": action.tool, "output": str(observation)[:200]}
+            final_output = ""
+
+            async for event in self._executor.astream_events(
+                {
+                    "input": user_input,
+                    "chat_history": chat_history,
+                },
+                version="v1",
+                config={
+                    "run_name": f"paper_agent_{session_id[:8]}",
+                    "tags": ["arxiv-agent", f"session:{session_id[:8]}"],
+                    "metadata": {"session_id": session_id},
+                },
+            ):
+                kind = event["event"]
+
+                if kind == "on_chat_model_stream":
+                    chunk = event["data"].get("chunk")
+                    if chunk is not None:
+                        content = getattr(chunk, "content", "")
+                        if isinstance(content, str) and content:
+                            yield {"type": "token", "content": content}
+                        elif isinstance(content, list):
+                            for part in content:
+                                if isinstance(part, dict) and part.get("type") == "text":
+                                    text = part.get("text", "")
+                                    if text:
+                                        yield {"type": "token", "content": text}
+
+                elif kind == "on_tool_end":
+                    tool_name = event.get("name", "unknown")
+                    tool_output = str(event["data"].get("output", ""))[:200]
+                    tool_input = str(event["data"].get("input", ""))
+                    steps.append({
+                        "tool": tool_name,
+                        "input": tool_input,
+                        "output": tool_output,
+                    })
+                    yield {"type": "tool_end", "tool": tool_name, "output": tool_output}
+
+                elif kind == "on_chain_end" and event.get("name") == f"paper_agent_{session_id[:8]}":
+                    output = event["data"].get("output", {})
+                    if isinstance(output, dict):
+                        final_output = output.get("output", "")
+                    else:
+                        final_output = str(output)
 
             yield {"type": "final", "content": final_output, "steps": steps}
 

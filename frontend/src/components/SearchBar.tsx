@@ -4,7 +4,7 @@ import { ingestPapers } from '../api'
 
 interface Props {
   onSearch: (query: string) => void
-  onIngestDone?: (count: number) => void
+  onIngestDone?: (count: number, query: string) => void
 }
 
 export default function SearchBar({ onSearch, onIngestDone }: Props) {
@@ -25,7 +25,7 @@ export default function SearchBar({ onSearch, onIngestDone }: Props) {
       const res = await ingestPapers(query.trim(), 10)
       const msg = `Indexed ${res.papers_fetched} papers (${res.chunks_inserted} chunks)`
       setIngestMsg(msg)
-      onIngestDone?.(res.papers_fetched)
+      onIngestDone?.(res.papers_fetched, query.trim())
     } catch (err) {
       setIngestMsg(`Ingest failed: ${err instanceof Error ? err.message : String(err)}`)
     } finally {

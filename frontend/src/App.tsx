@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { BookOpen, Cpu, Database, Wifi, WifiOff } from 'lucide-react'
 import SearchBar from './components/SearchBar'
 import PaperList from './components/PaperList'
@@ -30,14 +30,17 @@ export default function App() {
     }
   }
 
-  const handleIngestDone = async () => {
-    // Refresh papers list after ingestion
+  const handleIngestDone = (_count: number, query: string) => {
+    // Auto-search with the same query so the newly indexed papers appear in the list
+    if (query) {
+      handleSearch(query)
+    }
   }
 
   const serviceOk = health?.status === 'ok'
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col">
+    <div className="h-screen bg-gray-950 text-white flex flex-col overflow-hidden">
       {/* Header */}
       <header className="border-b border-gray-800 px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
